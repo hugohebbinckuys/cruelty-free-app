@@ -1,13 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
+    // kotlin("android")
     alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "com.example.cruelty_free_app"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.cruelty_free_app"
@@ -46,6 +45,17 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    // ML Kit barcode scanning
+    implementation ("com.google.mlkit:barcode-scanning:17.3.0")
+    // CameraX
+    implementation("androidx.camera:camera-camera2:1.3.1")
+    implementation("androidx.camera:camera-lifecycle:1.3.1")
+    implementation("androidx.camera:camera-view:1.3.1")
+    // Activity Compose pour rememberLauncherForPermissionRequest
+    implementation("androidx.activity:activity-compose:1.9.0")
+
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -53,4 +63,5 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
 }
