@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cruelty_free_app.ui.HistoryScreen
 import com.example.cruelty_free_app.ui.HomeScreen
 import com.example.cruelty_free_app.ui.ScannerScreen
 import java.util.concurrent.Executors
@@ -34,6 +35,9 @@ class MainActivity : ComponentActivity() {
                         cameraExecutor = cameraExecutor,
                         onBackClick = { navController.navigateUp() }
                     )
+                }
+                composable("history") {
+                    HistoryScreen(onBackClick = { navController.navigateUp() })
                 }
             }
         }

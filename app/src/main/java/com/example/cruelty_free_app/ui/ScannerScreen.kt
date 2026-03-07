@@ -24,6 +24,8 @@ import com.example.cruelty_free_app.camera.CameraManager
 import java.util.concurrent.ExecutorService
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
+import com.example.cruelty_free_app.data.ScanEntry
+import com.example.cruelty_free_app.data.ScanStorage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -105,6 +107,7 @@ fun ScannerScreen(
                     scanResult = code
                     hasScanned = true
                     showManualInput = false
+                    ScanStorage.save(context, ScanEntry(barcode = code))
                 }
             )
         }
@@ -126,6 +129,7 @@ fun ScannerScreen(
                 if (!hasScanned) {
                     hasScanned = true
                     scanResult = result
+                    ScanStorage.save(context, ScanEntry(barcode = result))
                 }
             }
         } else {
