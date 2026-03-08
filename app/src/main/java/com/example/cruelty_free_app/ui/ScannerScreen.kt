@@ -16,32 +16,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.cruelty_free_app.data.camera.CameraManager
-import com.example.cruelty_free_app.domain.model.ScanEntry
-import com.example.cruelty_free_app.domain.repository.ScanRepository
+import com.example.cruelty_free_app.ui.scanner.ScanEvent
+import com.example.cruelty_free_app.ui.scanner.ScannerViewModel
 import java.util.concurrent.ExecutorService
 
 @Composable
 fun ScannerScreen(
     cameraExecutor: ExecutorService,
-    scanRepository: ScanRepository,
-    onBackClick: () -> Unit
+    viewModel: ScannerViewModel,
+    onBackClick: () -> Unit,
+    onNavigateToProduct: (String) -> Unit
 ) {
     var showManualInput by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val previewView = remember { PreviewView(context) }
-    var scanResult by remember { mutableStateOf<String?>(null) }
-    var hasScanned by remember { mutableStateOf(false) }
+
+    // Collecte les events one-shot de navigation
+    LaunchedEffect("events") {
+        viewModel.events.collect { event ->
+            when (event) {
+                is ScanEvent.NavigateToProduct -> onNavigateToProduct(event.barcode)
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
         AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
 
-        // Bouton retour
         IconButton(
             onClick = onBackClick,
             modifier = Modifier
@@ -55,64 +61,31 @@ fun ScannerScreen(
             )
         }
 
-        // Bouton "Enter manually" — toujours visible en bas
-        if (scanResult == null) {
-            OutlinedButton(
-                onClick = { showManualInput = true },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(24.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.Black.copy(alpha = 0.5f),
-                    contentColor = Color.White
-                )
-            ) {
-                Text("Enter manually")
-            }
-        }
-
-        // Résultat scan
-        scanResult?.let { result ->
-            Card(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(24.dp)
-                    .fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = "Résultat :", fontSize = 14.sp)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = result, fontSize = 18.sp)
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Button(onClick = {
-                        scanResult = null
-                        hasScanned = false
-                    }) {
-                        Text("Retry")
-                    }
-                }
-            }
-        }
-
-        if (showManualInput) {
-            ManualInputDialog(
-                onDismiss = { showManualInput = false },
-                onConfirm = { code ->
-                    scanResult = code
-                    hasScanned = true
-                    showManualInput = false
-                    scanRepository.save(ScanEntry(barcode = code))
-                }
+        OutlinedButton(
+            onClick = { showManualInput = true },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(24.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = Color.Black.copy(alpha = 0.5f),
+                contentColor = Color.White
             )
+        ) {
+            Text("Saisir manuellement")
         }
     }
 
-    LaunchedEffect(Unit) {
-        //bloc qui s'execute une seule fois car on attend que Unit change avec le LaunchEffects sauf que Unit changera jamais (objet unique qui ne change jamais).
-        // On va avoir un "changement" uniquement si y a un resultat
+    if (showManualInput) {
+        ManualInputDialog(
+            onDismiss = { showManualInput = false },
+            onConfirm = { code ->
+                showManualInput = false
+                viewModel.onManualCodeEntered(code)
+            }
+        )
+    }
+
+    LaunchedEffect("camera") {
         if (ContextCompat.checkSelfPermission(
                 context, Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED
@@ -122,12 +95,8 @@ fun ScannerScreen(
                 lifecycleOwner = context as androidx.lifecycle.LifecycleOwner,
                 previewView = previewView,
                 cameraExecutor = cameraExecutor
-            ) { result ->
-                if (!hasScanned) {
-                    hasScanned = true
-                    scanResult = result
-                    scanRepository.save(ScanEntry(barcode = result))
-                }
+            ) { barcode ->
+                viewModel.onBarcodeDetected(barcode)
             }
         } else {
             ActivityCompat.requestPermissions(
@@ -148,12 +117,12 @@ fun ManualInputDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Enter barcode manually") },
+        title = { Text("Saisir le code-barres") },
         text = {
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it.filter { c -> c.isDigit() } },
-                label = { Text("Barcode number") },
+                label = { Text("Numéro de code-barres") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true
             )
@@ -163,12 +132,12 @@ fun ManualInputDialog(
                 onClick = { if (text.isNotEmpty()) onConfirm(text) },
                 enabled = text.isNotEmpty()
             ) {
-                Text("Confirm")
+                Text("Confirmer")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Annuler")
             }
         }
     )
