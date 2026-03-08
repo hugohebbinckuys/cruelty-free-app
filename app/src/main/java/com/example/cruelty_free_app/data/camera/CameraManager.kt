@@ -35,7 +35,7 @@ object CameraManager {
             val imageAnalysis = ImageAnalysis.Builder().build()
 
             val options = BarcodeScannerOptions.Builder()
-                .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_QR_CODE)
+                .setBarcodeFormats(Barcode.FORMAT_EAN_13)
                 .build()
 
             val scanner = BarcodeScanning.getClient(options)
