@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.cruelty_free_app.camera.CameraManager
+import com.example.cruelty_free_app.data.camera.CameraManager
 import com.example.cruelty_free_app.domain.model.ScanEntry
 import com.example.cruelty_free_app.domain.repository.ScanRepository
 import java.util.concurrent.ExecutorService
