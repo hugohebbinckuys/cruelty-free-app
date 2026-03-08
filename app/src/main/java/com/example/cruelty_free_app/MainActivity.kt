@@ -45,31 +45,8 @@ class MainActivity : ComponentActivity() {
         val scanLocalDataSource = ScanLocalDataSource(this)
         val scanRepository: ScanRepository = ScanRepositoryImpl(scanLocalDataSource)
 
-        setContent {
-            val navController = rememberNavController()
+        //
 
-            NavHost(navController = navController, startDestination = "home") {
-                composable("home") {
-                    HomeScreen(
-                        onScanClick = { navController.navigate("scanner") },
-                        onHistoryClick = { navController.navigate("history") }
-                    )
-                }
-                composable("scanner") {
-                    ScannerScreen(
-                        cameraExecutor = cameraExecutor,
-                        scanRepository = scanRepository,
-                        onBackClick = { navController.navigateUp() }
-                    )
-                }
-                composable("history") {
-                    HistoryScreen(
-                        scanRepository = scanRepository,
-                        onBackClick = { navController.navigateUp() }
-                    )
-                }
-            }
-        }
         val retrofit = Retrofit.Builder()
             .baseUrl(ProductApi.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
@@ -88,9 +65,62 @@ class MainActivity : ComponentActivity() {
 
         val crueltyFreeUseCase = CrueltyFreeUseCase(brandRepository,productRepository)
 
+        //
+
+        setContent {
+            val navController = rememberNavController()
+
+            NavHost(navController = navController, startDestination = "home") {
+                composable("home") {
+                    HomeScreen(
+                        onScanClick = { navController.navigate("scanner") },
+                        onHistoryClick = { navController.navigate("history") }
+                    )
+                }
+                composable("scanner") {
+                    ScannerScreen(
+                        cameraExecutor = cameraExecutor,
+                        scanRepository = scanRepository,
+                        onBackClick = { navController.navigateUp() },
+                        onScanResult = { barcode ->
+                            lifecycleScope.launch {
+                                Log.e("MainActivity", crueltyFreeUseCase.checkCrueltyFree(barcode).toString())
+                            }
+                        }
+                    )
+                }
+                composable("history") {
+                    HistoryScreen(
+                        scanRepository = scanRepository,
+                        onBackClick = { navController.navigateUp() }
+                    )
+                }
+            }
+        }
+
+        /*
+        val retrofit = Retrofit.Builder()
+            .baseUrl(ProductApi.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val productApi = retrofit.create(ProductApi::class.java)
+
+        val aliasesBrandDataSource = AliasesBrandDataSource(this)
+        val brandDataSource = BrandDataSource(this)
+
+
+
+        val brandRepository = BrandedRepositoryImp(brandDataSource,aliasesBrandDataSource)
+        val productRepository = ProductRepositoryImpl(productApi)
+
+
+        val crueltyFreeUseCase = CrueltyFreeUseCase(brandRepository,productRepository)
+        */
+         
+
         lifecycleScope.launch {
             Log.e("MainActivity",crueltyFreeUseCase.checkCrueltyFree("071249206034").toString())
-
         }
 
     }

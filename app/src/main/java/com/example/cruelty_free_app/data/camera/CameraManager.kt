@@ -8,11 +8,21 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import com.example.cruelty_free_app.data.local.datasource.AliasesBrandDataSource
+import com.example.cruelty_free_app.data.local.datasource.BrandDataSource
+import com.example.cruelty_free_app.data.remote.api.ProductApi
+import com.example.cruelty_free_app.data.repository.BrandedRepositoryImp
+import com.example.cruelty_free_app.data.repository.ProductRepositoryImpl
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.ExecutorService
+import com.example.cruelty_free_app.domain.usecase.CrueltyFreeUseCase
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 object CameraManager {
 
@@ -51,6 +61,7 @@ object CameraManager {
                             for (barcode in barcodes) {
                                 barcode.rawValue?.let {
                                     Log.d("SCAN_RESULT", it)
+
                                     onResult(it)
                                 }
                             }

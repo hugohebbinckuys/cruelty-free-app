@@ -29,7 +29,8 @@ import java.util.concurrent.ExecutorService
 fun ScannerScreen(
     cameraExecutor: ExecutorService,
     scanRepository: ScanRepository,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onScanResult: (String) -> Unit   //pour tester lkes logs sur mainactivity
 ) {
     var showManualInput by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -105,6 +106,7 @@ fun ScannerScreen(
                     hasScanned = true
                     showManualInput = false
                     scanRepository.save(ScanEntry(barcode = code))
+                    onScanResult(code)
                 }
             )
         }
@@ -127,6 +129,7 @@ fun ScannerScreen(
                     hasScanned = true
                     scanResult = result
                     scanRepository.save(ScanEntry(barcode = result))
+                    onScanResult(result)
                 }
             }
         } else {
