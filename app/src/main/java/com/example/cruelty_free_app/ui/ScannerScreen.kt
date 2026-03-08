@@ -35,6 +35,11 @@ fun ScannerScreen(
     val context = LocalContext.current
     val previewView = remember { PreviewView(context) }
 
+
+    LaunchedEffect("reset") {
+        viewModel.reset()
+    }
+
     // Collecte les events one-shot de navigation
     LaunchedEffect("events") {
         viewModel.events.collect { event ->

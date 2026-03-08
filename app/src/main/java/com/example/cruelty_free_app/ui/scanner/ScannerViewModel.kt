@@ -29,6 +29,10 @@ class ScannerViewModel(
         _events.tryEmit(ScanEvent.NavigateToProduct(barcode))
     }
 
+    fun reset() {
+        hasScanned = false
+    }
+
     companion object {
         fun factory(scanRepository: ScanRepository): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
