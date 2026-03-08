@@ -21,16 +21,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.cruelty_free_app.camera.CameraManager
+import com.example.cruelty_free_app.domain.model.ScanEntry
+import com.example.cruelty_free_app.domain.repository.ScanRepository
 import java.util.concurrent.ExecutorService
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
-import com.example.cruelty_free_app.data.ScanEntry
-import com.example.cruelty_free_app.data.ScanStorage
-import kotlinx.coroutines.launch
 
 @Composable
 fun ScannerScreen(
     cameraExecutor: ExecutorService,
+    scanRepository: ScanRepository,
     onBackClick: () -> Unit
 ) {
     var showManualInput by remember { mutableStateOf(false) }
@@ -38,7 +36,6 @@ fun ScannerScreen(
     val previewView = remember { PreviewView(context) }
     var scanResult by remember { mutableStateOf<String?>(null) }
     var hasScanned by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -107,7 +104,7 @@ fun ScannerScreen(
                     scanResult = code
                     hasScanned = true
                     showManualInput = false
-                    ScanStorage.save(context, ScanEntry(barcode = code))
+                    scanRepository.save(ScanEntry(barcode = code))
                 }
             )
         }
@@ -129,7 +126,7 @@ fun ScannerScreen(
                 if (!hasScanned) {
                     hasScanned = true
                     scanResult = result
-                    ScanStorage.save(context, ScanEntry(barcode = result))
+                    scanRepository.save(ScanEntry(barcode = result))
                 }
             }
         } else {

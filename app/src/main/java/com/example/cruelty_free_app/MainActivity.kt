@@ -5,22 +5,17 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import com.example.cruelty_free_app.data.local.datasource.AliasesBrandDataSource
 import com.example.cruelty_free_app.data.local.datasource.BrandDataSource
+import com.example.cruelty_free_app.data.local.datasource.ScanLocalDataSource
 import com.example.cruelty_free_app.data.repository.ProductRepositoryImpl
 import com.example.cruelty_free_app.data.remote.api.ProductApi
 import com.example.cruelty_free_app.data.repository.BrandedRepositoryImp
+import com.example.cruelty_free_app.data.repository.ScanRepositoryImpl
 import com.example.cruelty_free_app.domain.repository.BrandRepository
 import com.example.cruelty_free_app.domain.repository.ProductRepository
+import com.example.cruelty_free_app.domain.repository.ScanRepository
 import com.example.cruelty_free_app.domain.usecase.CrueltyFreeUseCase
 import com.example.cruelty_free_app.ui.theme.CrueltyfreeappTheme
 import kotlinx.coroutines.launch
@@ -47,6 +42,9 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
+        val scanLocalDataSource = ScanLocalDataSource(this)
+        val scanRepository: ScanRepository = ScanRepositoryImpl(scanLocalDataSource)
+
         setContent {
             val navController = rememberNavController()
 
@@ -60,11 +58,15 @@ class MainActivity : ComponentActivity() {
                 composable("scanner") {
                     ScannerScreen(
                         cameraExecutor = cameraExecutor,
+                        scanRepository = scanRepository,
                         onBackClick = { navController.navigateUp() }
                     )
                 }
                 composable("history") {
-                    HistoryScreen(onBackClick = { navController.navigateUp() })
+                    HistoryScreen(
+                        scanRepository = scanRepository,
+                        onBackClick = { navController.navigateUp() }
+                    )
                 }
             }
         }

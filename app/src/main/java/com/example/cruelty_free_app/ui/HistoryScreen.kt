@@ -10,18 +10,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cruelty_free_app.data.ScanEntry
-import com.example.cruelty_free_app.data.ScanStorage
+import com.example.cruelty_free_app.domain.model.ScanEntry
+import com.example.cruelty_free_app.domain.repository.ScanRepository
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun HistoryScreen(onBackClick: () -> Unit) {
-    val context = LocalContext.current
-    var entries by remember { mutableStateOf(ScanStorage.getAll(context)) }
+fun HistoryScreen(scanRepository: ScanRepository, onBackClick: () -> Unit) {
+    var entries by remember { mutableStateOf(scanRepository.getAll()) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -44,8 +42,8 @@ fun HistoryScreen(onBackClick: () -> Unit) {
                     HistoryItem(
                         entry = entry,
                         onDelete = {
-                            ScanStorage.delete(context, entry)
-                            entries = ScanStorage.getAll(context)
+                            scanRepository.delete(entry)
+                            entries = scanRepository.getAll()
                         }
                     )
                     HorizontalDivider()
