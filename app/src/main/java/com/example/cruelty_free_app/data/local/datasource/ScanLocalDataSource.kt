@@ -13,34 +13,32 @@ class ScanLocalDataSource(private val context: Context) {
         val array = JSONArray(prefs.getString("entries", "[]") ?: "[]")
         return (0 until array.length()).map { i ->
             val obj = array.getJSONObject(i)
-            ScanEntry(obj.getString("barcode"), obj.getLong("scannedAt"))
+            ScanEntry(
+                barcode = obj.getString("barcode"),
+                scannedAt = obj.getLong("scannedAt"),
+                title = obj.optString("title").takeIf { it.isNotEmpty() },
+                imageUrl = obj.optString("imageUrl").takeIf { it.isNotEmpty() }
+            )
         }
+    }
+
+    private fun ScanEntry.toJson() = JSONObject().apply {
+        put("barcode", barcode)
+        put("scannedAt", scannedAt)
+        title?.let { put("title", it) }
+        imageUrl?.let { put("imageUrl", it) }
     }
 
     fun save(entry: ScanEntry) {
         val array = JSONArray()
-        array.put(JSONObject().apply {
-            put("barcode", entry.barcode)
-            put("scannedAt", entry.scannedAt)
-        })
-        getAll().forEach { e ->
-            array.put(JSONObject().apply {
-                put("barcode", e.barcode)
-                put("scannedAt", e.scannedAt)
-            })
-        }
+        array.put(entry.toJson())
+        getAll().forEach { array.put(it.toJson()) }
         prefs.edit().putString("entries", array.toString()).apply()
     }
 
     fun delete(entry: ScanEntry) {
-        val filtered = getAll().filter { it.scannedAt != entry.scannedAt }
         val array = JSONArray()
-        filtered.forEach { e ->
-            array.put(JSONObject().apply {
-                put("barcode", e.barcode)
-                put("scannedAt", e.scannedAt)
-            })
-        }
+        getAll().filter { it.scannedAt != entry.scannedAt }.forEach { array.put(it.toJson()) }
         prefs.edit().putString("entries", array.toString()).apply()
     }
 }

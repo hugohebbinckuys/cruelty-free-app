@@ -10,8 +10,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.cruelty_free_app.domain.model.ScanEntry
 import com.example.cruelty_free_app.domain.repository.ScanRepository
 import java.text.SimpleDateFormat
@@ -61,10 +64,26 @@ fun HistoryItem(entry: ScanEntry, onDelete: () -> Unit) {
     }
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        if (entry.imageUrl != null) {
+            AsyncImage(
+                model = entry.imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(MaterialTheme.shapes.small)
+            )
+        } else {
+            Spacer(modifier = Modifier.size(56.dp))
+        }
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = entry.barcode, fontSize = 16.sp)
+            if (entry.title != null) {
+                Text(text = entry.title, fontSize = 16.sp, maxLines = 1)
+            }
+            Text(text = entry.barcode, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(text = date, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         IconButton(onClick = onDelete) {

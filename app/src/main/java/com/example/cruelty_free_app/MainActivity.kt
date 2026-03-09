@@ -89,6 +89,7 @@ class MainActivity : ComponentActivity() {
                         ProductScreen(
                             barcode = barcode,
                             useCase = crueltyFreeUseCase,
+                            scanRepository = scanRepository,
                             onBackClick = { navController.navigateUp() }
                         )
                     }

@@ -2,7 +2,6 @@ package com.example.cruelty_free_app.ui.scanner
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.cruelty_free_app.domain.model.ScanEntry
 import com.example.cruelty_free_app.domain.repository.ScanRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -19,13 +18,11 @@ class ScannerViewModel(
     fun onBarcodeDetected(barcode: String) {
         if (hasScanned) return
         hasScanned = true
-        scanRepository.save(ScanEntry(barcode = barcode))
         _events.tryEmit(ScanEvent.NavigateToProduct(barcode))
     }
 
     fun onManualCodeEntered(barcode: String) {
         if (barcode.isBlank()) return
-        scanRepository.save(ScanEntry(barcode = barcode))
         _events.tryEmit(ScanEvent.NavigateToProduct(barcode))
     }
 

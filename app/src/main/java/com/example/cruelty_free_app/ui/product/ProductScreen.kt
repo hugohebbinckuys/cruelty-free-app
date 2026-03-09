@@ -12,19 +12,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import com.example.cruelty_free_app.domain.repository.ScanRepository
 import com.example.cruelty_free_app.domain.usecase.CrueltyFreeUseCase
 
 @Composable
 fun ProductScreen(
     barcode: String,
     useCase: CrueltyFreeUseCase,
+    scanRepository: ScanRepository,
     onBackClick: () -> Unit
 ) {
     val vm: ProductViewModel = viewModel(
-        factory = ProductViewModel.factory(useCase, barcode)
+        factory = ProductViewModel.factory(useCase, scanRepository, barcode)
     )
     val state by vm.uiState.collectAsState()
 
@@ -78,6 +82,17 @@ private fun SuccessContent(state: ProductUiState.Success) {
             style = MaterialTheme.typography.headlineSmall
         )
 
+        if (state.product.images.isNotEmpty()) {
+            AsyncImage(
+                model = state.product.images.first(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+            )
+        }
+
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = if (isNonCrueltyFree) Color(0xFFFFEBEE) else Color(0xFFE8F5E9)
@@ -104,13 +119,6 @@ private fun SuccessContent(state: ProductUiState.Success) {
             Text(state.product.description, fontSize = 14.sp)
         }
 
-        if (state.product.images.isNotEmpty()) {
-            Text(
-                "${state.product.images.size} image(s) disponible(s)",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
     }
 }
 

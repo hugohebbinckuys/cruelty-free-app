@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -33,6 +34,7 @@ fun ScannerScreen(
 ) {
     var showManualInput by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val previewView = remember { PreviewView(context) }
 
 
@@ -90,14 +92,14 @@ fun ScannerScreen(
         )
     }
 
-    LaunchedEffect("camera") {
+    DisposableEffect("camera") {
         if (ContextCompat.checkSelfPermission(
                 context, Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             CameraManager.startCamera(
                 context = context,
-                lifecycleOwner = context as androidx.lifecycle.LifecycleOwner,
+                lifecycleOwner = lifecycleOwner,
                 previewView = previewView,
                 cameraExecutor = cameraExecutor
             ) { barcode ->
@@ -109,6 +111,10 @@ fun ScannerScreen(
                 arrayOf(Manifest.permission.CAMERA),
                 100
             )
+        }
+
+        onDispose {
+            CameraManager.stopCamera()
         }
     }
 }
